@@ -1,8 +1,8 @@
 const User = require("../models/User");
 
 const check = (req, res, next) => {
-  res.json("Connection Established");
-  console.log("Connection Established");
+  console.log("API is Running");
+  res.send("API is Running")
 };
 
 const index = (req, res, next) => {
