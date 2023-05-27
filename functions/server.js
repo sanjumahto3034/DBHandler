@@ -1,7 +1,9 @@
 const express = require("express");
+const route = express.Router();
 const app = express();
+const serverless = require('serverless-http');
 const bodyParser = require('body-parser');
-const userDB = require('./DBManager/DBManager')
+const userDB = require('./DBManager')
 const cors = require('cors');
 const mongoose = require('mongoose');
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -14,33 +16,6 @@ const db = mongoose.connection;
 db.on('error', (error) => console.error('MongoDB connection failed:', error));
 db.once('open', () => console.log('MongoDB connected successfully'));
 
-
-// var database;
-
-
-// // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-// const client = new MongoClient(uri, {
-//   serverApi: {
-//     version: ServerApiVersion.v1,
-//     strict: true,
-//     deprecationErrors: true,
-//   }
-// });
-// async function run() {
-//   try {
-//     // Connect the client to the server	(optional starting in v4.7)
-//     await client.connect();
-//     // Send a ping to confirm a successful connection
-//     await client.db("admin").command({ ping: 1 });
-//     database = client.db("myDatabase");
-//     console.log("Pinged your deployment. You successfully connected to MongoDB!");
-//     insert();
-//   } finally {
-//     // Ensures that the client will close when you finish/error
-//     // await client.close();
-//   }
-// }
-// run().catch(console.dir);
 
 async function insert(){
 const databs = database;
@@ -81,14 +56,17 @@ app.use(cors({
   }));
   
   
-app.post("/api/show", userDB.show);
-app.get("/api/index", userDB.index);
-app.post("/api/register", userDB.register);
-app.get("/api/check", userDB.check);
-app.post("/api/update", userDB.update);
-app.post("/api/remove", userDB.remove);
-app.post("/api/find", userDB.find);
-app.post("/api/login", userDB.login);
+route.post("/api/show", userDB.show);
+route.get("/api/index", userDB.index);
+route.post("/api/register", userDB.register);
+route.get("/api/check", userDB.check);
+route.post("/api/update", userDB.update);
+route.post("/api/remove", userDB.remove);
+route.post("/api/find", userDB.find);
+route.post("/api/login", userDB.login);
 const port = 4000;
-app.listen(port,()=>{console.log("Server Is Started at port",port)});
+// app.listen(port,()=>{console.log("Server Is Started at port",port)});
+app.use('/.netlify/functions/server',route);
+module.exports.handler = serverless(app);
+
 

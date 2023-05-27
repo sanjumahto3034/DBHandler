@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const User = require("./User");
 
 const check = (req, res, next) => {
   console.log("API is Running");
