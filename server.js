@@ -8,13 +8,11 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const dbName = 'mydatabase';
-var url = process.env.MONGO_URL || "mongodb+srv://testsanju001:owC4YRcC7FdRPZfB@db.qdmxhp7.mongodb.net/?retryWrites=true&w=majority";
+var url = "mongodb+srv://testsanju001:owC4YRcC7FdRPZfB@db.qdmxhp7.mongodb.net/?retryWrites=true&w=majority";
 mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
 const db = mongoose.connection;
 db.on('error', (error) => console.error('MongoDB connection failed:', error));
 db.once('open', () => console.log('MongoDB connected successfully'));
-
-
 
 app.use(bodyParser.json()); // Parse JSON bodies
 app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded bodies
@@ -39,7 +37,7 @@ app.post("/api/update", userDB.update);
 app.post("/api/remove", userDB.remove);
 app.post("/api/find", userDB.find);
 app.post("/api/login", userDB.login);
-const port = process.env.MONGO_URL || 4000;
+const port = process.env.PORT || 4000;
 app.listen(port,()=>{console.log("Server Is Started at port",port)});
 
 
