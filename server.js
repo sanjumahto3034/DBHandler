@@ -3,13 +3,13 @@ const route = express.Router();
 const app = express();
 const serverless = require('serverless-http');
 const bodyParser = require('body-parser');
-const userDB = require('./DBManager')
+const userDB = require('./functions/DBManager')
 const cors = require('cors');
 const mongoose = require('mongoose');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const dbName = 'mydatabase';
-const uri = 'mongodb://localhost:27017';
-mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true});
+var url = process.env.MONGO_URL || "mongodb+srv://testsanju001:owC4YRcC7FdRPZfB@db.qdmxhp7.mongodb.net/?retryWrites=true&w=majority";
+mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
 const db = mongoose.connection;
 db.on('error', (error) => console.error('MongoDB connection failed:', error));
 db.once('open', () => console.log('MongoDB connected successfully'));
@@ -29,16 +29,17 @@ app.use(cors({
     allowedHeaders: ['Authorization', 'Content-Type']
   }));
   
-route.get("/", userDB.check);
-route.post("/api/show", userDB.show);
-route.get("/api/index", userDB.index);
-route.post("/api/register", userDB.register);
-route.get("/api/check", userDB.check);
-route.post("/api/update", userDB.update);
-route.post("/api/remove", userDB.remove);
-route.post("/api/find", userDB.find);
-route.post("/api/login", userDB.login);
-const port = 4000;
+app.get("/", userDB.check);
+app.get("/api", userDB.check);
+app.post("/api/show", userDB.show);
+app.get("/api/index", userDB.index);
+app.post("/api/register", userDB.register);
+app.get("/api/check", userDB.check);
+app.post("/api/update", userDB.update);
+app.post("/api/remove", userDB.remove);
+app.post("/api/find", userDB.find);
+app.post("/api/login", userDB.login);
+const port = process.env.MONGO_URL || 4000;
 app.listen(port,()=>{console.log("Server Is Started at port",port)});
 
 
