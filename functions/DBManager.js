@@ -2,7 +2,8 @@ const User = require("./User");
 
 const check = (req, res, next) => {
   console.log("API is Running");
-  res.send("API is Running")
+  res.send("API is Running");
+  res.json({message:"API Is Running"});
 };
 
 const index = (req, res, next) => {
