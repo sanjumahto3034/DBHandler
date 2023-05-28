@@ -1,7 +1,5 @@
 const express = require("express");
-const route = express.Router();
 const app = express();
-const serverless = require('serverless-http');
 const bodyParser = require('body-parser');
 const userDB = require('./functions/DBManager')
 const cors = require('cors');
