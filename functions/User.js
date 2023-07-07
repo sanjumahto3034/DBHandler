@@ -6,8 +6,13 @@ const userData = new Schema({
     name:{type:String},
     email:{type:String},
     phoneNo:{type:String},
-    pass:{type:String},
+    password:{type:String},
+    token:{type:String},
+    inventory:[],
 },{timestamps:true});
+
+
+
 
 const User = mongoose.model('userSchema',userData);
 module.exports = User;
