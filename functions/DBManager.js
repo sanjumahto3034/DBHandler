@@ -41,7 +41,18 @@ const testAPI = (req, res, next) => {
 };
 var checkIfUserAlreadyExist = async (email) => {};
 
-const verifyToken = (res, token, response) => {
+const verifyResponse = (res, response) => {
+  if (!response) {
+    res.status = STATUS_CODE.FAILED;
+    res.json({
+      status: STATUS_CODE.FAILED,
+      ErrorMessage: "No Data Found",
+    });
+    return false;
+  }
+  return true;
+};
+const verifyToken = (res, token) => {
   if (!token) {
     res.status(401).json({
       status: 401,
@@ -49,13 +60,6 @@ const verifyToken = (res, token, response) => {
     });
     return false;
   }
-  // if (!response) {
-  //   res.status(401).json({
-  //     status: 401,
-  //     message: "Invalid/Expired Token",
-  //   });
-  //   return false;
-  // }
   return true;
   // // Verify and decode the token
   // jwt.verify(token, SECRET_KEY, (err, decoded) => {
@@ -250,7 +254,7 @@ const login = (req, res, next) => {
       if (response.password === password) {
         return User.updateOne({email: emailId}, {$set: {token: token}})
           .then(() => {
-            res.status(STATUS_CODE.SUCCESS);
+            res.status = STATUS_CODE.SUCCESS;
             res.json({
               status: STATUS_CODE.SUCCESS,
               message: "Login Successful",
@@ -259,7 +263,7 @@ const login = (req, res, next) => {
           })
           .catch((error) => {
             console.error("Error updating token:", error);
-            res.status(STATUS_CODE.FAILED);
+            res.status = STATUS_CODE.FAILED;
             res.json({
               status: STATUS_CODE.FAILED,
               message: "An error occurred during token update.",
@@ -269,7 +273,7 @@ const login = (req, res, next) => {
             });
           });
       } else {
-        res.status(STATUS_CODE.FAILED);
+        res.status = STATUS_CODE.FAILED;
         res.json({
           status: STATUS_CODE.PASSWORD_NOT_MATCHING,
           message: "Password Incorrect",
@@ -328,17 +332,81 @@ const addInventory = (req, res, next) => {
 };
 const getInventory = (req, res, next) => {
   var _token = splitBearerToken(req.headers.authorization);
+  console.log("API Get Inventory Hit", _token);
+  if (!verifyToken(res, _token)) {
+    return;
+  }
+  User.findOne({token: _token})
+    .then((response) => {
+      res.status = STATUS_CODE.SUCCESS;
+      res.json({status: STATUS_CODE.SUCCESS, message: response["inventory"]});
+    })
+    .catch((err) => {
+      res.json({message: err});
+    });
+};
+const removeInventory = (req, res, next) => {
+  const productToRemove = req.body.product_id; // Product_id of the product you want to remove
+  const token = splitBearerToken(req.headers.authorization);
+  if (!productToRemove || productToRemove == "") {
+    res
+      .status(STATUS_CODE.FAILED)
+      .json({
+        status: STATUS_CODE.FAILED,
+        "Error Message": "Product ID is Missing",
+      });
+    return;
+  }
+
+  User.findOneAndUpdate(
+    {token: token},
+    {$pull: {inventory: {product_id: productToRemove}}},
+    {new: true}
+  )
+    .then((response) => {
+      if (!response) {
+        // If the user with the given token is not found
+        return res
+          .status(STATUS_CODE.NOT_FOUND)
+          .json({message: "User not found."});
+      }
+
+      res
+        .status(STATUS_CODE.SUCCESS)
+        .json({status: STATUS_CODE.SUCCESS, message: response["inventory"]});
+    })
+    .catch((err) => {
+      res.status(STATUS_CODE.ERROR).json({message: err});
+    });
+};
+
+const userDetails = (req, res, next) => {
+  var _token = splitBearerToken(req.headers.authorization);
+  if (!verifyToken(res, _token)) {
+    return;
+  }
+  console.log("Token : ", _token);
 
   User.findOne({token: _token})
-  .then((response) => {
-    res.json({message: response["inventory"]});
-  })
-  .catch((err) => {
-    res.json({message: err});
-  });
+    .then((response) => {
+      console.log("Response : ", response);
+      if (verifyResponse(res, response)) {
+        res.status = STATUS_CODE.SUCCESS;
+        res.json({
+          status: STATUS_CODE.SUCCESS,
+          data: {
+            name: response?.name,
+            email: response?.email,
+            phoneNo: response?.phoneNo,
+          },
+        });
+      }
+    })
+    .catch((err) => {
+      res.status = STATUS_CODE.NOT_FOUND;
+      res.json({message: err});
+    });
 };
-const removeInventory = (req, res, next) => {};
-
 module.exports = {
   index,
   show,
@@ -351,5 +419,7 @@ module.exports = {
   addInventory,
   testAPI,
   loginWithToken,
-  getInventory
+  getInventory,
+  removeInventory,
+  userDetails,
 };
